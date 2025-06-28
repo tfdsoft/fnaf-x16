@@ -12,6 +12,7 @@
 #include "lib/wavkit.h"
 
 #include "functions/startup.c"
+#include "functions/savefile.c"
 #include "functions/input.c"
 #include "functions/color.c"
 #include "functions/load.c"

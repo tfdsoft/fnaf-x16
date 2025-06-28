@@ -54,14 +54,14 @@ void state_menu(){
 
         update_timers();
 
-        if((frame_timer[1])==0){
+        //if((frame_timer[1])==0){
             vera_layer_enable(0b11);
             low_byte(VERA.layer1.hscroll) = rand8();
             high_byte(VERA.layer1.hscroll) = rand8();
             low_byte(VERA.layer1.vscroll) = (rand8()&7);
-        } else {
+        //} else {
             vera_layer_enable(0b01);
-        }
+        //}
         
         if((frame_timer[7])==0){
             switch(rand8()&0x1f){
@@ -83,25 +83,30 @@ void state_menu(){
         draw_sprite(chr_slot(0), 48, 16, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_64); // Five Nights at Freddy's X16
         draw_sprite(chr_slot(64), 48, 96, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // New Game
         draw_sprite(chr_slot(80), 48, 116, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // Continue
-        draw_sprite(chr_slot(96), 48, 136, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // 6th Nigh
-        draw_sprite(chr_slot(128), 112, 136, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // t
-        draw_sprite(chr_slot(112), 48, 156, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // Custom N
-        draw_sprite(chr_slot(132), 112, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ig
-        draw_sprite(chr_slot(136), 128, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ht
         
+        RAM_BANK = SAVE_FILE_BANK;
 
-        if(mouse_in_window(48,96,64,16)){
-            change_selection(0);
+        if(mouse_in_window(48,96,64,16)) change_selection(0); // new game
+        if(mouse_in_window(48,116,64,16)) change_selection(1); // continue
+
+        if(s_night >= 6){
+            draw_sprite(chr_slot(96), 48, 136, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // 6th Nigh
+            draw_sprite(chr_slot(128), 112, 136, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // t
+            if(mouse_in_window(48,136,72,16)) change_selection(2);
         }
-        if(mouse_in_window(48,116,64,16)){
-            change_selection(1);
+        if(s_night == 7){
+            draw_sprite(chr_slot(112), 48, 156, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // Custom N
+            draw_sprite(chr_slot(132), 112, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ig
+            draw_sprite(chr_slot(136), 128, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ht
+            if(mouse_in_window(48,156,96,16)) change_selection(3);
         }
-        if(mouse_in_window(48,136,64,16) ){
-            change_selection(2);
-        }
-        if(mouse_in_window(48,156,64,16)){
-            change_selection(3);
-        }
+        
+        if((selection >= 2) && (s_night < 6)) selection = 1;
+
+        
+        
+        
+            
 
         draw_sprite(chr_slot(140), 24, (96+(20*selection)), SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // >>
 
@@ -113,9 +118,10 @@ void state_menu(){
         palette_update_now(0x10,0x000);
 
 
-        RAM_BANK = SAVE_FILE_BANK;
-        night += 1;
-        myass99sixtyfour += 1;
+        
+        if(pad_a_new){s_night += 1;}
+        if(pad_b_new){s_night -= 1;}
+        //myass99sixtyfour += 1;
     }
 }
 
@@ -194,6 +200,15 @@ int main(void){
     cbm_k_setlfs(15,8,15);
     cbm_k_open();
     cbm_k_close(15);    
+    
+
+    RAM_BANK = SAVE_FILE_BANK;
+    cx16_k_memory_fill(BANK_RAM, 0x2000, 0);
+    //hiram_load(2, "SAVEFILE", SAVE_FILE_BANK);
+    //if(strncmp((char*)BANK_RAM, "SAV",3)) {
+    //    savefile_generate();
+    //}
+    
 
     // init music
     zsm_init_engine(ZSMKIT_BANK);
