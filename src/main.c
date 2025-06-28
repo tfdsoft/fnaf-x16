@@ -96,7 +96,7 @@ void state_menu(){
         if(mouse_in_window(48,116,64,16)){
             change_selection(1);
         }
-        if(mouse_in_window(48,136,64,16)){
+        if(mouse_in_window(48,136,64,16) ){
             change_selection(2);
         }
         if(mouse_in_window(48,156,64,16)){
@@ -111,6 +111,11 @@ void state_menu(){
         zsm_fill_buffers();
 
         palette_update_now(0x10,0x000);
+
+
+        RAM_BANK = SAVE_FILE_BANK;
+        night += 1;
+        myass99sixtyfour += 1;
     }
 }
 

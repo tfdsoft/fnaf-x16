@@ -27,5 +27,9 @@ unsigned char frame_timer[8];
 // main program control variable
 unsigned char gamestate;
 
-unsigned char night;
-unsigned short h;
+
+//unsigned short h;
+
+
+__attribute__((section(".hiram"))) unsigned char night, myass99sixtyfour;
+//__attribute__((memory("ram")));
