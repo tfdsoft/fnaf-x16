@@ -1,10 +1,11 @@
 void savefile_generate(){
     RAM_BANK = SAVE_FILE_BANK;
-    strcpy(BANK_RAM, "SAV");
+    strcpy(save.header, "SAV");
+    save.night = 1;
 
     cbm_k_setnam("@:SAVEFILE");
     cbm_k_setlfs(8,8,2);
-    cx16_k_bsave((void*)0xa000,(void*)0xc000);
+    cx16_k_bsave((void*)0x400,(void*)0x800);
 }
 
 unsigned char savefile_peek(unsigned char* val){

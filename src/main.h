@@ -25,12 +25,25 @@ unsigned char frame_timer[8];
 
 
 // main program control variable
-unsigned char gamestate;
+unsigned char gamestate=1;
 
+unsigned char night=1;
 
 //unsigned short h;
 
+/*
+__attribute__((section(".hiram"))) struct {
+    unsigned char header[4];
+    
+} save;
+*/
+struct __save {
+    char header[4];
+    unsigned char night;
+};
+#define save (*(struct __save *)0x400)
 
-__attribute__((section(".hiram"))) 
-    unsigned char s_header_0, s_header_1, s_header_2, s_header_3, s_night;
+
+
+    
 //__attribute__((memory("ram")));

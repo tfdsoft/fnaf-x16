@@ -54,8 +54,9 @@ void load_sprite_from_sd(const char palette, const char * filename, const unsign
     // load palette
     strcpy(str,filename);
     strcat(str,"-PALETTE.BIN");
-    load_from_sd(0,str,(0xfa00 + (palette<<5)),3);
+    load_from_sd(0,str,(((void*)0x600) + (palette<<5)),0);
 }
+
 void draw_image_from_sd(const bool layer, const char palette, const char * filename, const unsigned short mapaddr, const unsigned char width){
     unsigned char i = 0, j = 0, tmp;
 
@@ -91,7 +92,7 @@ void draw_image_from_sd(const bool layer, const char palette, const char * filen
     // load palette
     strcpy(str,filename);
     strcat(str,"P.DAT");
-    load_from_sd(2,str,(0xfa00 + (palette<<5)),3);
+    load_from_sd(2,str,(0x600 + (palette<<5)),0);
 }
 
 void load_song(const char* fileptr){

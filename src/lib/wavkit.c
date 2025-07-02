@@ -136,7 +136,7 @@ void wavkit_fetchnext(){
             wavkit_ch.playing = 0;
             //VERA.audio.control = 0b10000000;
             cbm_k_close(10);
-            if(wavkit_ch.loop){
+            if(wavkit_ch.loop || (wavkit_ch.pos == 0)){ // && (!(wavkit_ch.playing))
                 wavkit_setfile(wavkit_ch.filename);
                 wavkit_setrate(wavkit_ch.rate, wavkit_ch.stereo, wavkit_ch.sixteenbit);
                 VERA.audio.rate = wavkit_ch.rate;
@@ -200,7 +200,7 @@ void wavkit_writenext(){
 
 
 void wavkit_tick(){
-    if(wavkit_ch.playing == 0) return;
+    //if(wavkit_ch.playing == 0) return;
 
     cbm_k_chkin(10);
     //if ((cbm_k_readst() & 0b01000000)) { 
@@ -228,7 +228,7 @@ void wavkit_stop(){
 void wavkit_restart(){
     VERA.audio.rate = 0;
     wavkit_ch.playing = 0;
-    VERA.audio.control = 0b10000000;
+    //VERA.audio.control = 0b10000000;
     cbm_k_close(10);
     wavkit_setfile(wavkit_ch.filename);
     wavkit_setrate(wavkit_ch.rate, wavkit_ch.stereo, wavkit_ch.sixteenbit);

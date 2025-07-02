@@ -17,8 +17,7 @@ void state_menu(){
     load_sfx("BLIP3",1);
     load_sfx("STATIC2",2);
     
-    
-    palette_update_set_now(2, title_palette);
+    palette_update_set(2, title_palette);
 
     // freddy
     load_from_sd(0,"MENU4BPP.BIN",0x0000,2);
@@ -42,26 +41,28 @@ void state_menu(){
 
 
     zsm_play(2);
+
     waitvsync();
     vera_layer_enable(0b11);
     vera_sprites_enable(1);
     while (1){
         waitvsync();
-        palette_update_now(0x10,0x777);
+        //blit_palette();
+        palette_update(0x10,0x777);
         clear_sprites();
         poll_controller();
         
 
         update_timers();
 
-        //if((frame_timer[1])==0){
+        if((frame_timer[1])==0){
             vera_layer_enable(0b11);
             low_byte(VERA.layer1.hscroll) = rand8();
             high_byte(VERA.layer1.hscroll) = rand8();
             low_byte(VERA.layer1.vscroll) = (rand8()&7);
-        //} else {
+        } else {
             vera_layer_enable(0b01);
-        //}
+        }
         
         if((frame_timer[7])==0){
             switch(rand8()&0x1f){
@@ -89,19 +90,21 @@ void state_menu(){
         if(mouse_in_window(48,96,64,16)) change_selection(0); // new game
         if(mouse_in_window(48,116,64,16)) change_selection(1); // continue
 
-        if(s_night >= 6){
+        if(save.night >= 6){
             draw_sprite(chr_slot(96), 48, 136, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // 6th Nigh
             draw_sprite(chr_slot(128), 112, 136, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // t
             if(mouse_in_window(48,136,72,16)) change_selection(2);
-        }
-        if(s_night == 7){
-            draw_sprite(chr_slot(112), 48, 156, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // Custom N
-            draw_sprite(chr_slot(132), 112, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ig
-            draw_sprite(chr_slot(136), 128, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ht
-            if(mouse_in_window(48,156,96,16)) change_selection(3);
+
+            if(save.night >= 7){
+                draw_sprite(chr_slot(112), 48, 156, SPR_P_1|SPR_Z_MID|SPR_W_64|SPR_H_16); // Custom N
+                draw_sprite(chr_slot(132), 112, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ig
+                draw_sprite(chr_slot(136), 128, 156, SPR_P_1|SPR_Z_MID|SPR_W_16|SPR_H_16); // ht
+                if(mouse_in_window(48,156,96,16)) change_selection(3);
+            }
         }
         
-        if((selection >= 2) && (s_night < 6)) selection = 1;
+        
+        if((selection >= 2) && (save.night < 6)) selection = 1;
 
         
         
@@ -115,29 +118,41 @@ void state_menu(){
         wavkit_tick();
         zsm_fill_buffers();
 
-        palette_update_now(0x10,0x000);
+        palette_update(0x10,0x000);
 
 
         
-        if(pad_a_new){s_night += 1;}
-        if(pad_b_new){s_night -= 1;}
-        //myass99sixtyfour += 1;
+        if(pad_a_new){save.night += 1;}
+        if(pad_b_new){save.night -= 1;}
     }
 }
-
-
 
 
 void state_game(){
 
     load_sfx("FAN",1);
+    load_sfx("PARTYFAVOR",2);
+    
+
+    strcpy(str, "VOICEOVER");
+    strcat(str, "1");
+    strcat(str, ".WAV");
+
+    wavkit_setfile(str);
+    wavkit_setrate(PCM_8000HZ,0,0);
+    //wavkit_setloop(1);
+    wavkit_setvol(12);
+    wavkit_restart();
+    wavkit_play();
 
     // office
     draw_image_from_sd(0,1,"OFFICE",NT_ADR_L0(0,0),51);
     load_sprite_from_sd(8,"FAN",0);
 
     // enable everything
+    zsm_play(1);
     waitvsync();
+    //blit_palette();
     vera_layer_enable(0b01);
     vera_sprites_enable(1);
 
@@ -149,10 +164,6 @@ void state_game(){
 
         update_timers();
         draw_sprite(chr_slot(((frame_timer[5]>>1)<<5)),(202-Camera.xmid),79,SPR_P_8|SPR_Z_MID|SPR_W_32|SPR_H_64);
-        
-
-        zsm_fill_buffers();
-
 
         framecount += 1;
         if(pad_b_new) {
@@ -166,7 +177,6 @@ void state_game(){
             ); 
         }
 
-
         // mouse in window stuff
         if(mouse_in_window(0,0,32,255)) Camera.xmid -= 2;
         if(mouse_in_window(32,0,32,255)) Camera.xmid -= 1;
@@ -176,23 +186,24 @@ void state_game(){
         if(high_byte(Camera.xmid) > 0) Camera.xmid = 0;
         if(low_byte(Camera.xmid) > 80) Camera.xmid = 80;
 
-
-
         // freddy nose
         if(mouse_left_new && mouse_in_window((172-low_byte(Camera.xmid)),60,3,3)){
-            load_sfx("PARTYFAVOR",2);
+            zsm_rewind(2);
+            zsm_play(2);
         }
 
         //VERA.layer0.hscroll += 1;
+        
+        wavkit_tick();
+        zsm_fill_buffers();
         
     }
 }
 
 
-
-
 int main(void){
     configure_video();
+    get_default_palette();
     cx16_k_mouse_config(-1,40,23);
 
     // change directories to the assets folder
@@ -201,14 +212,15 @@ int main(void){
     cbm_k_open();
     cbm_k_close(15);    
     
-
     RAM_BANK = SAVE_FILE_BANK;
-    cx16_k_memory_fill(BANK_RAM, 0x2000, 0);
-    //hiram_load(2, "SAVEFILE", SAVE_FILE_BANK);
-    //if(strncmp((char*)BANK_RAM, "SAV",3)) {
-    //    savefile_generate();
-    //}
+    cx16_k_memory_fill((void*)0x400, 0x200, 0);
+    hiram_load(2, "SAVEFILE", SAVE_FILE_BANK);
+    if(strncmp((char*)BANK_RAM, "SAV",3)) {
+        savefile_generate();
+    }
     
+    grab_irq_vector();
+    set_custom_irq();
 
     // init music
     zsm_init_engine(ZSMKIT_BANK);
@@ -218,7 +230,8 @@ int main(void){
     
     while (1){
         switch (gamestate){
-            case 0: state_menu(); 
+            case 0: state_menu(); break;
+            case 1: state_game(); break;
         }
     }
     

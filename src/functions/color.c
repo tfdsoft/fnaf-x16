@@ -1,28 +1,57 @@
-void palette_update_now(
+#define PALETTE ((unsigned short *)0x600)
+
+void palette_update(
     const unsigned char index, 
     const short color){
 
     // add index twice since each color is two bytes
-
-    VERA.address = 0xFA00+(index<<1);
-    VERA.address_hi = 1|VERA_INC_1;
-    VERA.data0 = low_byte(color);
-    VERA.data0 = high_byte(color);
+    
+    PALETTE[index] = color;
+    //VERA.address = 0xFA00+(index<<1);
+    //VERA.address_hi = 1|VERA_INC_1;
+    //VERA.data0 = low_byte(color);
+    //VERA.data0 = high_byte(color);
 }
 
-void palette_update_set_now(
+void palette_update_set(
     unsigned char pal, 
     const short * set){
 
     pal &= 0x0f;
     // add index twice since each color is two bytes
+    //for(char i = 0; i < 16; i++){
+    //    palette[(i+(pal<<4))] = set[i];
+    //}
+    cx16_k_memory_copy((void*)set, (void*)PALETTE, 16);
 
-    VERA.address = 0xFA00+(pal<<5);
+    //VERA.address = 0xFA00+(pal<<5);
+    //VERA.address_hi = 1|VERA_INC_1;
+    //for(char i = 0; i < 16; i++){
+    //    VERA.data0 = low_byte(set[i]);
+    //    VERA.data0 = high_byte(set[i]);
+    //}
+}
+
+void get_default_palette(){
+    VERA.address = 0xfa00;
     VERA.address_hi = 1|VERA_INC_1;
-    for(char i = 0; i < 16; i++){
-        VERA.data0 = low_byte(set[i]);
-        VERA.data0 = high_byte(set[i]);
-    }
+    cx16_k_memory_copy((void*)&VERA.data0, (void*)PALETTE, 512);
+}
+
+void blit_palette(){
+    unsigned short oldaddr = VERA.address;
+    unsigned char oldaddr_hi = VERA.address_hi;
+
+    VERA.address = 0xfa00;
+    VERA.address_hi = 1|VERA_INC_1;
+    //for(short i=0;i<255;i++){
+    //    VERA.data0 = low_byte(PALETTE[i]);
+    //    VERA.data0 = high_byte(PALETTE[i]);
+    //}
+    cx16_k_memory_copy((void*)PALETTE, (void*)&VERA.data0, 512);
+
+    VERA.address = oldaddr;
+    VERA.address_hi = oldaddr_hi;
 }
 
 unsigned short lerp_color(

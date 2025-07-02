@@ -36,7 +36,7 @@ struct __mouse {
     unsigned short y;
     unsigned char b,s;
 };
-#define mousePosZP (*(volatile struct __mouse *)0xd4)
+#define mousePosZP (*(volatile struct __mouse *)0xd8)
 // see pad vars above
 
 struct __zp mouse {
@@ -68,10 +68,10 @@ void poll_controller(){
 
     //mouse.button = cx16_k_mouse_get(&mousePosZP);
     __attribute__((leaf)) __asm__ volatile(
-        "ldx #$d4 \n"
+        "ldx #$d8 \n"
         "jsr $ff6b \n"
-        "sta $d8 \n"
-        "stx $d9 \n"
+        "sta $dc \n"
+        "stx $dd \n"
     ); // call "mouse_get" kernal function*/
 
     mouse.x = mousePosZP.x;
@@ -92,12 +92,13 @@ void poll_controller(){
     
     // Get the status bytes from the A and X registers
     __asm__("eor #%11111111"); // negate low byte
-    __asm__("sta $d4");
+    __asm__("sta $dc");
     __asm__("txa");
     __asm__("eor #%11111111"); // negate high byte
-    __asm__("sta $d5");
+    __asm__("sta $dd");
     
-    pad = mousePosZP.x;
+    low_byte(pad) = mousePosZP.b;
+    high_byte(pad) = mousePosZP.s;
     //if(mouse_left)low_byte(pad)^=0x80; // toggle B if left mouse held
     //if(mouse_left)low_byte(pad)^=0x80; // toggle B if left mouse held
 

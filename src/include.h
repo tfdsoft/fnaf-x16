@@ -18,5 +18,6 @@
 #include "functions/load.c"
 #include "functions/draw.c"
 #include "functions/cx16_rand.c"
+#include "functions/irq.c"
 
 #include "const.c"
